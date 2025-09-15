@@ -1,1 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --primary: #2563eb;
+  --accent: #10b981;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+body.theme-healthcare {
+  --primary: #0f766e;
+  --accent: #10b981;
+  --background: #f4f9f8;
+  --surface: #ffffff;
+  --text: #16302d;
+  --text-muted: #647b78;
+  --border: #d9e8e5;
+}
+
+body.theme-finance {
+  --primary: #2563eb;
+  --accent: #22c55e;
+  --background: #0b1220;
+  --surface: #111c2e;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #243247;
+}
