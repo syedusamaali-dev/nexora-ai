@@ -1,0 +1,47 @@
+<header class="header">
+
+  <div class="brand">
+    <div class="brand-mark">N</div>
+
+    <div>
+      <div class="brand-name">NEXORA</div>
+      <div class="brand-subtitle">AI Knowledge Platform</div>
+    </div>
+  </div>
+
+  <nav class="industry-switcher">
+
+    <button
+      class="industry-button"
+      [class.active]="industryService.currentIndustry() === 'healthcare'"
+      (click)="selectIndustry('healthcare')"
+    >
+      <span class="icon">🏥</span>
+      Healthcare
+    </button>
+
+    <button
+      class="industry-button"
+      [class.active]="industryService.currentIndustry() === 'finance'"
+      (click)="selectIndustry('finance')"
+    >
+      <span class="icon">📊</span>
+      Finance
+    </button>
+
+  </nav>
+
+  <div class="header-actions">
+    <button class="icon-button">⌕</button>
+
+    <div class="user">
+      <div class="avatar">U</div>
+
+      <div class="user-info">
+        <strong>Usama</strong>
+        <span>Developer</span>
+      </div>
+    </div>
+  </div>
+
+</header>

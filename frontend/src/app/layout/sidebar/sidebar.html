@@ -1,0 +1,46 @@
+<aside class="sidebar">
+
+  <div class="sidebar-section">
+
+    <div class="section-label">WORKSPACE</div>
+
+    <button class="nav-item active">
+      <span>⌂</span>
+      Overview
+    </button>
+
+    <button class="nav-item">
+      <span>▣</span>
+      Documents
+    </button>
+
+    <button class="nav-item">
+      <span>◉</span>
+      AI Chat
+    </button>
+
+  </div>
+
+  <div class="sidebar-section">
+
+    <div class="section-label">KNOWLEDGE</div>
+
+    @for (type of industryService.getConfig().documentTypes; track type) {
+      <button class="nav-item">
+        <span>◇</span>
+        {{ type }}
+      </button>
+    }
+
+  </div>
+
+  <div class="sidebar-bottom">
+
+    <button class="nav-item">
+      <span>⚙</span>
+      Settings
+    </button>
+
+  </div>
+
+</aside>
