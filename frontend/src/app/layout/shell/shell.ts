@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
-import { Dashboard } from '../../features/dashboard/dashboard';
+import { Dashboard } from '../../features/dashboard/dashboard/dashboard';
 
 @Component({
   selector: 'app-shell',
