@@ -1,26 +1,44 @@
-import { Router } from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
-import {
-  getDocuments,
-  getDocument,
-  uploadDocument,
-  deleteDocument
-} from '../controllers/document.controller.js';
+const uploadDirectory = 'uploads';
 
-import { upload } from '../middleware/upload.middleware.js';
+if (!fs.existsSync(uploadDirectory)) {
+  fs.mkdirSync(uploadDirectory, {
+    recursive: true
+  });
+}
 
-const router = Router();
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDirectory);
+  },
 
-router.get('/', getDocuments);
+  filename: (req, file, cb) => {
+    const uniqueName =
+      `${Date.now()}-${Math.round(Math.random() * 1e9)}` +
+      path.extname(file.originalname);
 
-router.get('/:id', getDocument);
+    cb(null, uniqueName);
+  }
+});
 
-router.post(
-  '/',
-  upload.single('file'),
-  uploadDocument
-);
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'application/pdf') {
+    cb(null, true);
+  } else {
+    cb(
+      new Error('Only PDF documents are currently supported.'),
+      false
+    );
+  }
+};
 
-router.delete('/:id', deleteDocument);
-
-export default router;
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 25 * 1024 * 1024
+  }
+});

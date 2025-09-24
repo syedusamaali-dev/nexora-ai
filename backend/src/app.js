@@ -4,7 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 
 import documentRoutes from './routes/document.routes.js';
 import chatRoutes from './routes/chat.routes.js';
-import industryRoutes from './routes/industry.routes.js';
+// import industryRoutes from './routes/industry.routes.js';
 
 import { swaggerSpec } from './docs/swagger.js';
 import { errorHandler } from './middleware/error.middleware.js';
@@ -31,7 +31,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/industries', industryRoutes);
+// app.use('/api/industries', industryRoutes);
 
 app.use(
   '/api-docs',

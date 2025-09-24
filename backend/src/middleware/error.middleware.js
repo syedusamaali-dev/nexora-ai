@@ -1,19 +1,10 @@
-import 'dotenv/config';
+export const errorHandler = (err, req, res, next) => {
+  console.error(err);
 
-import app from './src/app.js';
-import { connectDB } from './src/config/db.js';
+  const statusCode = err.statusCode || 500;
 
-const PORT = process.env.PORT || 5000;
-
-const startServer = async () => {
-  await connectDB();
-
-  app.listen(PORT, () => {
-    console.log(`Nexora API running on http://localhost:${PORT}`);
-    console.log(
-      `Swagger UI: http://localhost:${PORT}/api-docs`
-    );
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal server error'
   });
 };
-
-startServer();

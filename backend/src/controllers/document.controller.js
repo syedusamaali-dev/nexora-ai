@@ -50,7 +50,6 @@ export const getDocument = async (req, res, next) => {
 
 export const uploadDocument = async (req, res, next) => {
   try {
-
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -58,10 +57,7 @@ export const uploadDocument = async (req, res, next) => {
       });
     }
 
-    const {
-      industry,
-      category
-    } = req.body;
+    const { industry, category } = req.body;
 
     if (!industry || !category) {
       return res.status(400).json({
@@ -94,7 +90,6 @@ export const uploadDocument = async (req, res, next) => {
 
 export const deleteDocument = async (req, res, next) => {
   try {
-
     const document = await Document.findByIdAndDelete(
       req.params.id
     );
