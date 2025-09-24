@@ -77,9 +77,12 @@ export const uploadDocument = async (req, res, next) => {
       status: 'uploaded'
     });
 
+    // Process PDF → extract text → create chunks
+    await processDocument(document._id);
+
     res.status(201).json({
       success: true,
-      message: 'Document uploaded successfully',
+      message: 'Document uploaded and processed successfully',
       data: document
     });
 
