@@ -1,5 +1,5 @@
 import { Document } from '../models/document.model.js';
-
+import { processDocument } from '../services/document.service.js';
 export const getDocuments = async (req, res, next) => {
   try {
     const filter = {};
