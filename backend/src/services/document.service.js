@@ -1,8 +1,8 @@
-import fs from 'fs/promises';
-import pdfParse from 'pdf-parse';
+import fs from "fs/promises";
+import { PDFParse } from "pdf-parse";
 
-import { Document } from '../models/document.model.js';
-import { Chunk } from '../models/chunk.model.js';
+import { Document } from "../models/document.model.js";
+import { Chunk } from "../models/chunk.model.js";
 
 const CHUNK_SIZE = 1000;
 const CHUNK_OVERLAP = 150;
@@ -13,10 +13,7 @@ const splitText = (text) => {
   let start = 0;
 
   while (start < text.length) {
-    const end = Math.min(
-      start + CHUNK_SIZE,
-      text.length
-    );
+    const end = Math.min(start + CHUNK_SIZE, text.length);
 
     const chunk = text.slice(start, end).trim();
 
@@ -34,21 +31,27 @@ export const processDocument = async (documentId) => {
   const document = await Document.findById(documentId);
 
   if (!document) {
-    throw new Error('Document not found');
+    throw new Error("Document not found");
   }
 
   try {
-    document.status = 'processing';
+    document.status = "processing";
     await document.save();
 
     const buffer = await fs.readFile(document.filePath);
 
-    const pdf = await pdfParse(buffer);
+    const parser = new PDFParse({
+      data: buffer,
+    });
+
+    const pdf = await parser.getText();
+
+    await parser.destroy();
 
     const chunks = splitText(pdf.text);
 
     await Chunk.deleteMany({
-      documentId: document._id
+      documentId: document._id,
     });
 
     const chunkDocuments = chunks.map((content, index) => ({
@@ -56,7 +59,7 @@ export const processDocument = async (documentId) => {
       industry: document.industry,
       content,
       page: null,
-      chunkIndex: index
+      chunkIndex: index,
     }));
 
     if (chunkDocuments.length > 0) {
@@ -65,15 +68,14 @@ export const processDocument = async (documentId) => {
 
     document.pages = pdf.numpages;
     document.chunks = chunks.length;
-    document.status = 'ready';
+    document.status = "ready";
     document.errorMessage = null;
 
     await document.save();
 
     return document;
-
   } catch (error) {
-    document.status = 'failed';
+    document.status = "failed";
     document.errorMessage = error.message;
 
     await document.save();
