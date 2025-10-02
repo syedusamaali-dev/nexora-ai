@@ -1,5 +1,5 @@
-import { Document } from '../models/document.model.js';
-import { processDocument } from '../services/document.service.js';
+import { Document } from "../models/document.model.js";
+import { processDocument } from "../services/document.service.js";
 export const getDocuments = async (req, res, next) => {
   try {
     const filter = {};
@@ -12,16 +12,13 @@ export const getDocuments = async (req, res, next) => {
       filter.category = req.query.category;
     }
 
-    const documents = await Document
-      .find(filter)
-      .sort({ createdAt: -1 });
+    const documents = await Document.find(filter).sort({ createdAt: -1 });
 
     res.json({
       success: true,
       count: documents.length,
-      data: documents
+      data: documents,
     });
-
   } catch (error) {
     next(error);
   }
@@ -34,15 +31,14 @@ export const getDocument = async (req, res, next) => {
     if (!document) {
       return res.status(404).json({
         success: false,
-        message: 'Document not found'
+        message: "Document not found",
       });
     }
 
     res.json({
       success: true,
-      data: document
+      data: document,
     });
-
   } catch (error) {
     next(error);
   }
@@ -53,7 +49,7 @@ export const uploadDocument = async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'PDF file is required'
+        message: "PDF file is required",
       });
     }
 
@@ -62,30 +58,29 @@ export const uploadDocument = async (req, res, next) => {
     if (!industry || !category) {
       return res.status(400).json({
         success: false,
-        message: 'Industry and category are required'
+        message: "Industry and category are required",
       });
     }
 
     const document = await Document.create({
-      name: req.file.originalname.replace(/\.pdf$/i, ''),
+      name: req.file.originalname.replace(/\.pdf$/i, ""),
       originalName: req.file.originalname,
       industry,
       category,
       filePath: req.file.path,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      status: 'uploaded'
+      status: "uploaded",
     });
 
     // Process PDF → extract text → create chunks
-    await processDocument(document._id);
+    const processedDocument = await processDocument(document._id);
 
     res.status(201).json({
       success: true,
-      message: 'Document uploaded and processed successfully',
-      data: document
+      message: "Document uploaded and processed successfully",
+      data: processedDocument,
     });
-
   } catch (error) {
     next(error);
   }
@@ -93,22 +88,19 @@ export const uploadDocument = async (req, res, next) => {
 
 export const deleteDocument = async (req, res, next) => {
   try {
-    const document = await Document.findByIdAndDelete(
-      req.params.id
-    );
+    const document = await Document.findByIdAndDelete(req.params.id);
 
     if (!document) {
       return res.status(404).json({
         success: false,
-        message: 'Document not found'
+        message: "Document not found",
       });
     }
 
     res.json({
       success: true,
-      message: 'Document deleted successfully'
+      message: "Document deleted successfully",
     });
-
   } catch (error) {
     next(error);
   }
