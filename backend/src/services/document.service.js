@@ -3,7 +3,7 @@ import { PDFParse } from "pdf-parse";
 
 import { Document } from "../models/document.model.js";
 import { Chunk } from "../models/chunk.model.js";
-
+import { createEmbedding } from './embedding.service.js';
 const CHUNK_SIZE = 1000;
 const CHUNK_OVERLAP = 150;
 
@@ -54,13 +54,22 @@ export const processDocument = async (documentId) => {
       documentId: document._id,
     });
 
-    const chunkDocuments = chunks.map((content, index) => ({
-      documentId: document._id,
-      industry: document.industry,
-      content,
-      page: null,
-      chunkIndex: index,
-    }));
+   const chunkDocuments = [];
+
+for (let index = 0; index < chunks.length; index++) {
+  const content = chunks[index];
+
+  const embedding = await createEmbedding(content);
+
+  chunkDocuments.push({
+    documentId: document._id,
+    industry: document.industry,
+    content,
+    page: null,
+    chunkIndex: index,
+    embedding
+  });
+}
 
     if (chunkDocuments.length > 0) {
       await Chunk.insertMany(chunkDocuments);
