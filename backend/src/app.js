@@ -8,7 +8,7 @@ import chatRoutes from './routes/chat.routes.js';
 
 import { swaggerSpec } from './docs/swagger.js';
 import { errorHandler } from './middleware/error.middleware.js';
-
+import searchRoutes from './routes/search.routes.js';
 const app = express();
 
 app.use(
@@ -32,7 +32,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
 // app.use('/api/industries', industryRoutes);
-
+app.use('/api/search', searchRoutes);
 app.use(
   '/api-docs',
   swaggerUi.serve,

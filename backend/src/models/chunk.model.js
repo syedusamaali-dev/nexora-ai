@@ -29,7 +29,11 @@ const chunkSchema = new mongoose.Schema(
     chunkIndex: {
       type: Number,
       required: true
-    }
+    },
+    embedding: {
+    type: [Number],
+    default: []
+  }
   },
   {
     timestamps: true
