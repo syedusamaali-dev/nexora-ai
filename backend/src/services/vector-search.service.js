@@ -6,10 +6,17 @@ export const searchSimilarChunks = async ({
   industry,
   limit = 5
 }) => {
-  // 1. Convert question into an embedding
+
+  // ---------------------------------------
+  // 1. Create embedding for question
+  // ---------------------------------------
+
   const queryEmbedding = await createEmbedding(question);
 
-  // 2. Search MongoDB Vector Search
+  // ---------------------------------------
+  // 2. Vector search
+  // ---------------------------------------
+
   const results = await Chunk.aggregate([
     {
       $vectorSearch: {
@@ -19,8 +26,25 @@ export const searchSimilarChunks = async ({
         numCandidates: 100,
         limit,
         filter: {
-          industry: industry
+          industry
         }
+      }
+    },
+
+    // Get document information
+    {
+      $lookup: {
+        from: 'documents',
+        localField: 'documentId',
+        foreignField: '_id',
+        as: 'document'
+      }
+    },
+
+    {
+      $unwind: {
+        path: '$document',
+        preserveNullAndEmptyArrays: true
       }
     },
 
@@ -32,6 +56,9 @@ export const searchSimilarChunks = async ({
         content: 1,
         page: 1,
         chunkIndex: 1,
+
+        documentName: '$document.originalName',
+
         score: {
           $meta: 'vectorSearchScore'
         }
