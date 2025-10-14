@@ -13,8 +13,8 @@ router.get('/', getChats);
 
 router.post('/', createChat);
 
-router.post('/:id/messages', sendMessage);
-
 router.get('/:id', getChat);
+
+router.post('/:id/messages', sendMessage);
 
 export default router;
