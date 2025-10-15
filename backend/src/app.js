@@ -30,7 +30,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/documents', documentRoutes);
-app.use('/api/chat', chatRoutes);
+app.use('/api/chats', chatRoutes);
 // app.use('/api/industries', industryRoutes);
 app.use('/api/search', searchRoutes);
 app.use(
