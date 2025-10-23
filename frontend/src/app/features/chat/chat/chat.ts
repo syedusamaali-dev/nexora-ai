@@ -6,11 +6,11 @@ import {
   ChatMessage,
   ChatSource
 } from '../../../core/models/chat.model';
-
+import { DatePipe , TitleCasePipe ,DecimalPipe } from '@angular/common';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule , DatePipe, TitleCasePipe, DecimalPipe],
   templateUrl: './chat.html',
   styleUrl: './chat.scss'
 })
@@ -181,4 +181,16 @@ export class ChatComponent implements OnInit {
   ): number {
     return index;
   }
+  handleEnter(event: Event): void {
+  const keyboardEvent = event as KeyboardEvent;
+
+  // Shift + Enter = new line
+  if (keyboardEvent.shiftKey) {
+    return;
+  }
+
+  // Enter = send message
+  keyboardEvent.preventDefault();
+  this.sendMessage();
+}
 }

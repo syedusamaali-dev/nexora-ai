@@ -1,184 +1,202 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ChatService } from '../../../core/services/chat.service';
-import {
-  Chat,
-  ChatMessage,
-  ChatSource
-} from '../../../core/models/chat.model';
+<div class="chat-page">
+  <!-- Conversation Sidebar -->
+  <aside class="conversation-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Conversations</h2>
+        <span>Nexora AI</span>
+      </div>
 
-@Component({
-  selector: 'app-chat',
-  standalone: true,
-  imports: [FormsModule],
-  templateUrl: './chat.html',
-  styleUrl: './chat.scss'
-})
-export class ChatComponent implements OnInit {
-  private readonly chatService = inject(ChatService);
+      <button class="new-chat-btn" type="button" (click)="createChat()" [disabled]="creatingChat">
+        +
+      </button>
+    </div>
 
-  chats: Chat[] = [];
-  activeChat: Chat | null = null;
+    <div class="industry-selector">
+      <label for="industry"> Industry </label>
 
-  selectedIndustry: 'healthcare' | 'finance' = 'healthcare';
+      <select id="industry" [(ngModel)]="selectedIndustry" (change)="changeIndustry()">
+        <option value="healthcare">Healthcare</option>
 
-  question = '';
+        <option value="finance">Finance</option>
+      </select>
+    </div>
 
-  loadingChats = false;
-  creatingChat = false;
-  sendingMessage = false;
+    @if (loadingChats) {
+      <div class="loading">Loading conversations...</div>
+    } @else {
+      <div class="conversation-list">
+        @for (chat of chats; track chat._id) {
+          <button
+            class="conversation-item"
+            [class.active]="activeChat?._id === chat._id"
+            type="button"
+            (click)="selectChat(chat)"
+          >
+            <span class="conversation-title">
+              {{ chat.title }}
+            </span>
 
-  errorMessage = '';
+            <span class="conversation-date">
+              {{ chat.updatedAt | date: 'short' }}
+            </span>
+          </button>
+        } @empty {
+          <div class="empty-conversations">
+            <p>No conversations yet.</p>
 
-  ngOnInit(): void {
-    this.loadChats();
-  }
-
-  loadChats(): void {
-    this.loadingChats = true;
-    this.errorMessage = '';
-
-    this.chatService
-      .getChats(this.selectedIndustry)
-      .subscribe({
-        next: (response) => {
-          this.chats = response.data;
-
-          if (this.chats.length > 0) {
-            this.selectChat(this.chats[0]);
-          }
-
-          this.loadingChats = false;
-        },
-        error: (error) => {
-          console.error('Failed to load chats:', error);
-
-          this.errorMessage = 'Unable to load conversations.';
-          this.loadingChats = false;
+            <button type="button" (click)="createChat()">Start a conversation</button>
+          </div>
         }
-      });
-  }
-
-  selectChat(chat: Chat): void {
-    this.activeChat = chat;
-  }
-
-  createChat(): void {
-    if (this.creatingChat) {
-      return;
+      </div>
     }
+  </aside>
 
-    this.creatingChat = true;
-    this.errorMessage = '';
+  <!-- Main Chat -->
+  <main class="chat-panel">
+    @if (!activeChat) {
+      <section class="welcome-screen">
+        <div class="welcome-icon">✦</div>
 
-    this.chatService
-      .createChat(
-        this.selectedIndustry,
-        'New Conversation'
-      )
-      .subscribe({
-        next: (response) => {
-          this.activeChat = response.data;
+        <h1>Nexora AI</h1>
 
-          this.chats = [
-            response.data,
-            ...this.chats
-          ];
+        <p>Ask questions about your organization's knowledge base.</p>
 
-          this.creatingChat = false;
-        },
-        error: (error) => {
-          console.error('Failed to create chat:', error);
+        <button type="button" (click)="createChat()" [disabled]="creatingChat">
+          Start New Conversation
+        </button>
+      </section>
+    } @else {
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div>
+          <h1>
+            {{ activeChat.title }}
+          </h1>
 
-          this.errorMessage = 'Unable to create conversation.';
-          this.creatingChat = false;
+          <span>
+            {{ activeChat.industry | titlecase }}
+          </span>
+        </div>
+
+        <div class="status">
+          <span class="status-dot"></span>
+          AI Ready
+        </div>
+      </header>
+
+      <!-- Messages -->
+      <section class="messages">
+        @for (message of activeChat.messages; track $index) {
+          <article
+            class="message"
+            [class.user-message]="message.role === 'user'"
+            [class.ai-message]="message.role === 'assistant'"
+          >
+            <div class="avatar">
+              @if (message.role === 'user') {
+                You
+              } @else {
+                AI
+              }
+            </div>
+
+            <div class="message-body">
+              <div class="message-role">
+                @if (message.role === 'user') {
+                  You
+                } @else {
+                  Nexora AI
+                }
+              </div>
+
+              <div class="message-content">
+                {{ message.content }}
+              </div>
+
+              <!-- Sources -->
+              @if (message.role === 'assistant' && message.sources && message.sources.length > 0) {
+                <div class="sources">
+                  <div class="sources-title">Sources</div>
+
+                  @for (source of message.sources; track $index) {
+                    <div class="source">
+                      <span class="source-number">
+                        {{ $index + 1 }}
+                      </span>
+
+                      <div>
+                        <strong>
+                          {{ source.documentName }}
+                        </strong>
+
+                        <small>
+                          Chunk {{ source.chunkIndex ?? '-' }}
+
+                          @if (source.score) {
+                            ·
+                            {{ source.score * 100 | number: '1.0-1' }}% match
+                          }
+                        </small>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </article>
         }
-      });
-  }
 
-  changeIndustry(): void {
-    this.activeChat = null;
-    this.loadChats();
-  }
+        <!-- Loading -->
+        @if (sendingMessage) {
+          <article class="message ai-message">
+            <div class="avatar">AI</div>
 
-  sendMessage(): void {
-    const question = this.question.trim();
+            <div class="message-body">
+              <div class="message-role">Nexora AI</div>
 
-    if (!question || this.sendingMessage) {
-      return;
-    }
-
-    if (!this.activeChat) {
-      this.createChat();
-
-      return;
-    }
-
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: question,
-      sources: []
-    };
-
-    this.activeChat = {
-      ...this.activeChat,
-      messages: [
-        ...this.activeChat.messages,
-        userMessage
-      ]
-    };
-
-    this.question = '';
-    this.sendingMessage = true;
-    this.errorMessage = '';
-
-    this.chatService
-      .sendMessage(
-        this.activeChat._id,
-        question
-      )
-      .subscribe({
-        next: (response) => {
-          this.activeChat = response.data.chat;
-
-          this.chats = this.chats.map(chat =>
-            chat._id === this.activeChat?._id
-              ? this.activeChat!
-              : chat
-          );
-
-          this.sendingMessage = false;
-        },
-        error: (error) => {
-          console.error('Failed to send message:', error);
-
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to get an AI response.';
-
-          this.sendingMessage = false;
+              <div class="typing">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </article>
         }
-      });
-  }
+      </section>
 
-  trackByChatId(
-    _index: number,
-    chat: Chat
-  ): string {
-    return chat._id;
-  }
+      <!-- Composer -->
+      <footer class="composer">
+        @if (errorMessage) {
+          <div class="error">
+            {{ errorMessage }}
+          </div>
+        }
 
-  trackByMessage(
-    index: number,
-    _message: ChatMessage
-  ): number {
-    return index;
-  }
+        <div class="input-wrapper">
+          <textarea
+            [(ngModel)]="question"
+            placeholder="Ask Nexora AI..."
+            rows="1"
+            [disabled]="sendingMessage"
+            (keydown.enter)="handleEnter($event)"
+          ></textarea>
 
-  trackBySource(
-    index: number,
-    _source: ChatSource
-  ): number {
-    return index;
-  }
-}
+          <button
+            type="button"
+            class="send-btn"
+            (click)="sendMessage()"
+            [disabled]="!question.trim() || sendingMessage"
+          >
+            Send
+          </button>
+        </div>
+
+        <p class="disclaimer">
+          AI-generated responses may contain mistakes. Verify important information with trusted
+          sources.
+        </p>
+      </footer>
+    }
+  </main>
+</div>
