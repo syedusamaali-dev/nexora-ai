@@ -34,30 +34,46 @@ export class ChatComponent implements OnInit {
     this.loadChats();
   }
 
-  loadChats(): void {
-    this.loadingChats = true;
-    this.errorMessage = '';
+ loadChats(): void {
+  this.loadingChats = true;
+  this.errorMessage = '';
 
-    this.chatService
-      .getChats(this.selectedIndustry)
-      .subscribe({
-        next: (response) => {
-          this.chats = response.data;
+  console.log('🔵 Loading chats for:', this.selectedIndustry);
 
-          if (this.chats.length > 0) {
-            this.selectChat(this.chats[0]);
-          }
+  this.chatService.getChats(this.selectedIndustry).subscribe({
+    next: (response) => {
+      console.log('🟢 Chats API response:', response);
 
-          this.loadingChats = false;
-        },
-        error: (error) => {
-          console.error('Failed to load chats:', error);
+      this.chats = response.data ?? [];
 
-          this.errorMessage = 'Unable to load conversations.';
-          this.loadingChats = false;
-        }
-      });
-  }
+      console.log('🟢 Chats loaded:', this.chats);
+
+      if (this.chats.length > 0) {
+        this.activeChat = this.chats[0];
+        console.log('🟢 Active chat:', this.activeChat);
+      } else {
+        this.activeChat = null;
+        console.log('🟡 No chats found');
+      }
+
+      this.loadingChats = false;
+
+      console.log('🟢 loadingChats:', this.loadingChats);
+    },
+
+    error: (error) => {
+      console.error('🔴 Failed to load chats:', error);
+
+      this.errorMessage =
+        error?.error?.message ||
+        'Unable to load conversations.';
+
+      this.loadingChats = false;
+
+      console.log('🔴 loadingChats:', this.loadingChats);
+    }
+  });
+}
 
   selectChat(chat: Chat): void {
     this.activeChat = chat;
@@ -101,65 +117,77 @@ export class ChatComponent implements OnInit {
     this.loadChats();
   }
 
-  sendMessage(): void {
-    const question = this.question.trim();
+ sendMessage(): void {
+  const question = this.question.trim();
 
-    if (!question || this.sendingMessage) {
-      return;
-    }
-
-    if (!this.activeChat) {
-      this.createChat();
-
-      return;
-    }
-
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: question,
-      sources: []
-    };
-
-    this.activeChat = {
-      ...this.activeChat,
-      messages: [
-        ...this.activeChat.messages,
-        userMessage
-      ]
-    };
-
-    this.question = '';
-    this.sendingMessage = true;
-    this.errorMessage = '';
-
-    this.chatService
-      .sendMessage(
-        this.activeChat._id,
-        question
-      )
-      .subscribe({
-        next: (response) => {
-          this.activeChat = response.data.chat;
-
-          this.chats = this.chats.map(chat =>
-            chat._id === this.activeChat?._id
-              ? this.activeChat!
-              : chat
-          );
-
-          this.sendingMessage = false;
-        },
-        error: (error) => {
-          console.error('Failed to send message:', error);
-
-          this.errorMessage =
-            error?.error?.message ||
-            'Unable to get an AI response.';
-
-          this.sendingMessage = false;
-        }
-      });
+  if (!question || this.sendingMessage) {
+    return;
   }
+
+  if (!this.activeChat) {
+    console.warn('No active chat. Creating one...');
+    this.createChat();
+    return;
+  }
+
+  const chatId = this.activeChat._id;
+
+  console.log('🔵 Sending message');
+  console.log('Chat ID:', chatId);
+  console.log('Question:', question);
+
+  const userMessage: ChatMessage = {
+    role: 'user',
+    content: question,
+    sources: []
+  };
+
+  this.activeChat = {
+    ...this.activeChat,
+    messages: [
+      ...this.activeChat.messages,
+      userMessage
+    ]
+  };
+
+  this.question = '';
+  this.sendingMessage = true;
+  this.errorMessage = '';
+
+  this.chatService.sendMessage(chatId, question).subscribe({
+    next: (response) => {
+      console.log('🟢 Message API response:', response);
+
+      if (response.success && response.data?.chat) {
+        this.activeChat = response.data.chat;
+
+        this.chats = this.chats.map(chat =>
+          chat._id === this.activeChat!._id
+            ? this.activeChat!
+            : chat
+        );
+
+        console.log('🟢 Updated active chat:', this.activeChat);
+      }
+
+      this.sendingMessage = false;
+
+      console.log('🟢 sendingMessage:', this.sendingMessage);
+    },
+
+    error: (error) => {
+      console.error('🔴 Failed to send message:', error);
+
+      this.errorMessage =
+        error?.error?.message ||
+        'Unable to get an AI response.';
+
+      this.sendingMessage = false;
+
+      console.log('🔴 sendingMessage:', this.sendingMessage);
+    }
+  });
+}
 
   trackByChatId(
     _index: number,

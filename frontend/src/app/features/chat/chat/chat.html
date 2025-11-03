@@ -85,6 +85,14 @@
         </div>
       </header>
 
+      <!-- DEBUG -->
+<div style="padding: 10px; background: yellow; color: black; border: 2px solid red;">
+  DEBUG:
+  activeChat = {{ activeChat ? 'YES' : 'NO' }} |
+  messages = {{ activeChat?.messages?.length ?? 0 }} |
+  sending = {{ sendingMessage }}
+</div>
+
       <!-- Messages -->
       <section class="messages">
         @for (message of activeChat.messages; track $index) {
