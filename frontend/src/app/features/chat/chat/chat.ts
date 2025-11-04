@@ -1,23 +1,45 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject
+} from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
+
+import {
+  DatePipe,
+  DecimalPipe,
+  TitleCasePipe
+} from '@angular/common';
+
 import { ChatService } from '../../../core/services/chat.service';
+
 import {
   Chat,
   ChatMessage,
   ChatSource
 } from '../../../core/models/chat.model';
-import { DatePipe , TitleCasePipe ,DecimalPipe } from '@angular/common';
+
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [FormsModule , DatePipe, TitleCasePipe, DecimalPipe],
+  imports: [
+    FormsModule,
+    DatePipe,
+    TitleCasePipe,
+    DecimalPipe
+  ],
   templateUrl: './chat.html',
   styleUrl: './chat.scss'
 })
 export class ChatComponent implements OnInit {
+
   private readonly chatService = inject(ChatService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   chats: Chat[] = [];
+
   activeChat: Chat | null = null;
 
   selectedIndustry: 'healthcare' | 'finance' = 'healthcare';
@@ -30,56 +52,124 @@ export class ChatComponent implements OnInit {
 
   errorMessage = '';
 
+  // =========================================================
+  // INIT
+  // =========================================================
+
   ngOnInit(): void {
     this.loadChats();
   }
 
- loadChats(): void {
-  this.loadingChats = true;
-  this.errorMessage = '';
+  // =========================================================
+  // LOAD CHATS
+  // =========================================================
 
-  console.log('🔵 Loading chats for:', this.selectedIndustry);
+  loadChats(): void {
 
-  this.chatService.getChats(this.selectedIndustry).subscribe({
-    next: (response) => {
-      console.log('🟢 Chats API response:', response);
+    this.loadingChats = true;
+    this.errorMessage = '';
 
-      this.chats = response.data ?? [];
+    console.log(
+      '🔵 Loading chats for:',
+      this.selectedIndustry
+    );
 
-      console.log('🟢 Chats loaded:', this.chats);
+    this.chatService
+      .getChats(this.selectedIndustry)
+      .subscribe({
 
-      if (this.chats.length > 0) {
-        this.activeChat = this.chats[0];
-        console.log('🟢 Active chat:', this.activeChat);
-      } else {
-        this.activeChat = null;
-        console.log('🟡 No chats found');
-      }
+        next: (response) => {
 
-      this.loadingChats = false;
+          console.log(
+            '🟢 Chats API response:',
+            response
+          );
 
-      console.log('🟢 loadingChats:', this.loadingChats);
-    },
+          this.chats = response.data ?? [];
 
-    error: (error) => {
-      console.error('🔴 Failed to load chats:', error);
+          console.log(
+            '🟢 Chats loaded:',
+            this.chats
+          );
 
-      this.errorMessage =
-        error?.error?.message ||
-        'Unable to load conversations.';
+          if (this.chats.length > 0) {
 
-      this.loadingChats = false;
+            this.activeChat = this.chats[0];
 
-      console.log('🔴 loadingChats:', this.loadingChats);
-    }
-  });
-}
+            console.log(
+              '🟢 Active chat:',
+              this.activeChat
+            );
 
-  selectChat(chat: Chat): void {
-    this.activeChat = chat;
+          } else {
+
+            this.activeChat = null;
+
+            console.log(
+              '🟡 No chats found'
+            );
+          }
+
+          this.loadingChats = false;
+
+          // Force Angular UI refresh
+          this.cdr.detectChanges();
+
+          console.log(
+            '🟢 loadingChats:',
+            this.loadingChats
+          );
+
+          console.log(
+            '🟢 activeChat:',
+            this.activeChat
+          );
+
+        },
+
+        error: (error) => {
+
+          console.error(
+            '🔴 Failed to load chats:',
+            error
+          );
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to load conversations.';
+
+          this.loadingChats = false;
+
+          // Force Angular UI refresh
+          this.cdr.detectChanges();
+
+        }
+
+      });
   }
 
+  // =========================================================
+  // SELECT CHAT
+  // =========================================================
+
+  selectChat(chat: Chat): void {
+
+    console.log(
+      '🟣 Selecting chat:',
+      chat._id
+    );
+
+    this.activeChat = chat;
+
+    this.cdr.detectChanges();
+  }
+
+  // =========================================================
+  // CREATE CHAT
+  // =========================================================
+
   createChat(): void {
+
     if (this.creatingChat) {
       return;
     }
@@ -87,112 +177,333 @@ export class ChatComponent implements OnInit {
     this.creatingChat = true;
     this.errorMessage = '';
 
+    console.log(
+      '🔵 Creating new chat:',
+      this.selectedIndustry
+    );
+
     this.chatService
       .createChat(
         this.selectedIndustry,
         'New Conversation'
       )
       .subscribe({
+
         next: (response) => {
-          this.activeChat = response.data;
+
+          console.log(
+            '🟢 Chat created:',
+            response
+          );
+
+          const newChat = response.data;
+
+          this.activeChat = newChat;
 
           this.chats = [
-            response.data,
+            newChat,
             ...this.chats
           ];
 
           this.creatingChat = false;
-        },
-        error: (error) => {
-          console.error('Failed to create chat:', error);
 
-          this.errorMessage = 'Unable to create conversation.';
+          this.cdr.detectChanges();
+
+        },
+
+        error: (error) => {
+
+          console.error(
+            '🔴 Failed to create chat:',
+            error
+          );
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to create conversation.';
+
           this.creatingChat = false;
+
+          this.cdr.detectChanges();
+
         }
+
       });
   }
 
+  // =========================================================
+  // CHANGE INDUSTRY
+  // =========================================================
+
   changeIndustry(): void {
+
+    console.log(
+      '🟡 Changing industry:',
+      this.selectedIndustry
+    );
+
     this.activeChat = null;
+
     this.loadChats();
   }
 
- sendMessage(): void {
-  const question = this.question.trim();
+  // =========================================================
+  // SEND MESSAGE
+  // =========================================================
 
-  if (!question || this.sendingMessage) {
-    return;
-  }
+  sendMessage(): void {
 
-  if (!this.activeChat) {
-    console.warn('No active chat. Creating one...');
-    this.createChat();
-    return;
-  }
+    const question = this.question.trim();
 
-  const chatId = this.activeChat._id;
+    // -----------------------------------------
+    // Validation
+    // -----------------------------------------
 
-  console.log('🔵 Sending message');
-  console.log('Chat ID:', chatId);
-  console.log('Question:', question);
-
-  const userMessage: ChatMessage = {
-    role: 'user',
-    content: question,
-    sources: []
-  };
-
-  this.activeChat = {
-    ...this.activeChat,
-    messages: [
-      ...this.activeChat.messages,
-      userMessage
-    ]
-  };
-
-  this.question = '';
-  this.sendingMessage = true;
-  this.errorMessage = '';
-
-  this.chatService.sendMessage(chatId, question).subscribe({
-    next: (response) => {
-      console.log('🟢 Message API response:', response);
-
-      if (response.success && response.data?.chat) {
-        this.activeChat = response.data.chat;
-
-        this.chats = this.chats.map(chat =>
-          chat._id === this.activeChat!._id
-            ? this.activeChat!
-            : chat
-        );
-
-        console.log('🟢 Updated active chat:', this.activeChat);
-      }
-
-      this.sendingMessage = false;
-
-      console.log('🟢 sendingMessage:', this.sendingMessage);
-    },
-
-    error: (error) => {
-      console.error('🔴 Failed to send message:', error);
-
-      this.errorMessage =
-        error?.error?.message ||
-        'Unable to get an AI response.';
-
-      this.sendingMessage = false;
-
-      console.log('🔴 sendingMessage:', this.sendingMessage);
+    if (!question) {
+      return;
     }
-  });
-}
+
+    if (this.sendingMessage) {
+      return;
+    }
+
+    // -----------------------------------------
+    // Make sure chat exists
+    // -----------------------------------------
+
+    if (!this.activeChat) {
+
+      console.warn(
+        '🟡 No active chat. Creating one...'
+      );
+
+      this.createChat();
+
+      return;
+    }
+
+    const chatId = this.activeChat._id;
+
+    console.log('================================');
+    console.log('🔵 Sending message');
+    console.log('Chat ID:', chatId);
+    console.log('Question:', question);
+    console.log('================================');
+
+    // -----------------------------------------
+    // Immediately show user's message
+    // -----------------------------------------
+
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: question,
+      sources: []
+    };
+
+    this.activeChat = {
+      ...this.activeChat,
+
+      messages: [
+        ...this.activeChat.messages,
+        userMessage
+      ]
+    };
+
+    // -----------------------------------------
+    // Reset input
+    // -----------------------------------------
+
+    this.question = '';
+
+    // -----------------------------------------
+    // Show AI typing indicator
+    // -----------------------------------------
+
+    this.sendingMessage = true;
+
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+
+    console.log(
+      '🟡 sendingMessage BEFORE API:',
+      this.sendingMessage
+    );
+
+    // -----------------------------------------
+    // Call backend
+    // -----------------------------------------
+
+    this.chatService
+      .sendMessage(
+        chatId,
+        question
+      )
+      .subscribe({
+
+        next: (response) => {
+
+          console.log(
+            '🟢 Message API response:',
+            response
+          );
+
+          // -------------------------------------
+          // Validate backend response
+          // -------------------------------------
+
+          if (
+            !response ||
+            !response.success ||
+            !response.data
+          ) {
+
+            console.error(
+              '🔴 Invalid API response:',
+              response
+            );
+
+            this.errorMessage =
+              'The AI response was invalid.';
+
+            this.sendingMessage = false;
+
+            this.cdr.detectChanges();
+
+            return;
+          }
+
+          // -------------------------------------
+          // Get returned chat
+          // -------------------------------------
+
+          const returnedChat =
+            response.data.chat;
+
+          console.log(
+            '🟢 Returned chat:',
+            returnedChat
+          );
+
+          console.log(
+            '🟢 Returned messages:',
+            returnedChat?.messages
+          );
+
+          // -------------------------------------
+          // Update active chat
+          // -------------------------------------
+
+          if (returnedChat) {
+
+            this.activeChat = returnedChat;
+
+            // -----------------------------------
+            // Update chat in conversation list
+            // -----------------------------------
+
+            this.chats = this.chats.map(chat =>
+              chat._id === returnedChat._id
+                ? returnedChat
+                : chat
+            );
+
+          }
+
+          // -------------------------------------
+          // STOP LOADING
+          // -------------------------------------
+
+          this.sendingMessage = false;
+
+          console.log(
+            '🟢 Updated active chat:',
+            this.activeChat
+          );
+
+          console.log(
+            '🟢 Messages:',
+            this.activeChat?.messages.length
+          );
+
+          console.log(
+            '🟢 sendingMessage AFTER API:',
+            this.sendingMessage
+          );
+
+          // -------------------------------------
+          // IMPORTANT
+          // Force Angular UI update
+          // -------------------------------------
+
+          this.cdr.detectChanges();
+
+          console.log(
+            '🟢 UI refresh triggered'
+          );
+
+        },
+
+        error: (error) => {
+
+          console.error(
+            '🔴 Failed to send message:',
+            error
+          );
+
+          this.errorMessage =
+            error?.error?.message ||
+            'Unable to get an AI response.';
+
+          // -------------------------------------
+          // STOP LOADING EVEN ON ERROR
+          // -------------------------------------
+
+          this.sendingMessage = false;
+
+          this.cdr.detectChanges();
+
+          console.log(
+            '🔴 sendingMessage AFTER ERROR:',
+            this.sendingMessage
+          );
+
+        }
+
+      });
+  }
+
+  // =========================================================
+  // ENTER KEY
+  // =========================================================
+
+  handleEnter(event: Event): void {
+
+    const keyboardEvent =
+      event as KeyboardEvent;
+
+    // Shift + Enter
+    // Allow newline
+    if (keyboardEvent.shiftKey) {
+      return;
+    }
+
+    // Enter
+    // Send message
+    keyboardEvent.preventDefault();
+
+    this.sendMessage();
+  }
+
+  // =========================================================
+  // TRACKING
+  // =========================================================
 
   trackByChatId(
     _index: number,
     chat: Chat
   ): string {
+
     return chat._id;
   }
 
@@ -200,6 +511,7 @@ export class ChatComponent implements OnInit {
     index: number,
     _message: ChatMessage
   ): number {
+
     return index;
   }
 
@@ -207,18 +519,7 @@ export class ChatComponent implements OnInit {
     index: number,
     _source: ChatSource
   ): number {
+
     return index;
   }
-  handleEnter(event: Event): void {
-  const keyboardEvent = event as KeyboardEvent;
-
-  // Shift + Enter = new line
-  if (keyboardEvent.shiftKey) {
-    return;
-  }
-
-  // Enter = send message
-  keyboardEvent.preventDefault();
-  this.sendMessage();
-}
 }
