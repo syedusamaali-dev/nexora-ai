@@ -717,3 +717,376 @@
     display: none;
   }
 }
+
+/* =========================================================
+   ATTACHMENTS
+========================================================= */
+
+.input-wrapper {
+  position: relative;
+}
+
+
+/* Attach button */
+
+.attach-btn {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: var(--text-muted);
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.attach-btn:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--primary) 10%,
+    transparent
+  );
+
+  color: var(--primary);
+}
+
+.attach-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+
+/* Selected file */
+
+.attachment-preview {
+  max-width: 900px;
+
+  margin: 0 auto 10px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px 11px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 9px;
+
+  background: var(--surface);
+}
+
+
+/* PDF icon */
+
+.attachment-icon {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+
+  background: color-mix(
+    in srgb,
+    var(--primary) 12%,
+    transparent
+  );
+
+  color: var(--primary);
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+
+/* File information */
+
+.attachment-info {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.attachment-info strong {
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.attachment-info span {
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+
+/* Remove */
+
+.remove-attachment-btn {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: var(--text-muted);
+
+  font-size: 19px;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.remove-attachment-btn:hover {
+  background: color-mix(
+    in srgb,
+    var(--primary) 10%,
+    transparent
+  );
+
+  color: var(--primary);
+}
+
+
+/* =========================================================
+   UPLOAD STATUS
+========================================================= */
+
+.attachment-error {
+  max-width: 900px;
+
+  margin: 0 auto 8px;
+
+  padding: 8px 10px;
+
+  border: 1px solid color-mix(
+    in srgb,
+    #ef4444 20%,
+    var(--border)
+  );
+
+  border-radius: 7px;
+
+  background: color-mix(
+    in srgb,
+    #ef4444 7%,
+    transparent
+  );
+
+  color: #dc2626;
+
+  font-size: 11px;
+}
+
+
+.attachment-success {
+  max-width: 900px;
+
+  margin: 0 auto 8px;
+
+  padding: 8px 10px;
+
+  border: 1px solid color-mix(
+    in srgb,
+    #22c55e 20%,
+    var(--border)
+  );
+
+  border-radius: 7px;
+
+  background: color-mix(
+    in srgb,
+    #22c55e 7%,
+    transparent
+  );
+
+  color: #16a34a;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   SPINNERS
+========================================================= */
+
+.upload-spinner,
+.send-spinner,
+.delete-spinner {
+  display: inline-block;
+
+  border-radius: 50%;
+
+  border: 2px solid var(--border);
+
+  border-top-color: var(--primary);
+
+  animation: nexora-spin 0.7s linear infinite;
+}
+
+
+.upload-spinner {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+}
+
+
+.send-spinner {
+  width: 13px;
+  height: 13px;
+
+  border-color: rgba(255, 255, 255, 0.35);
+
+  border-top-color: white;
+}
+
+
+.delete-spinner {
+  width: 12px;
+  height: 12px;
+}
+
+
+@keyframes nexora-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   DELETE CHAT
+========================================================= */
+
+.conversation-item {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+
+.conversation-info {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.delete-chat-btn {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  opacity: 0;
+
+  transition:
+    opacity 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+
+.conversation-item:hover
+.delete-chat-btn {
+  opacity: 1;
+}
+
+
+.delete-chat-btn:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    #ef4444 10%,
+    transparent
+  );
+
+  color: #dc2626;
+}
+
+
+.delete-chat-btn:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* Keep delete visible on active conversation */
+
+.conversation-item.active
+.delete-chat-btn {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   MOBILE ATTACHMENT
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .attachment-preview {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .attach-btn {
+    width: 32px;
+  }
+
+}

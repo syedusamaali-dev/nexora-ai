@@ -39,3 +39,20 @@ export interface SendMessageResponse {
     chat: Chat;
   };
 }
+
+export interface DocumentUploadResponse {
+  success: boolean;
+  message: string;
+  data: {
+    _id: string;
+    name: string;
+    originalName: string;
+    industry: 'healthcare' | 'finance';
+    category: string;
+    status: string;
+    mimeType: string;
+    size: number;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+}

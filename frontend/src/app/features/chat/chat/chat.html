@@ -1,75 +1,198 @@
 <div class="chat-page">
-  <!-- Conversation Sidebar -->
+
+  <!-- =====================================================
+       CONVERSATION SIDEBAR
+  ====================================================== -->
+
   <aside class="conversation-panel">
+
     <div class="panel-header">
+
       <div>
         <h2>Conversations</h2>
         <span>Nexora AI</span>
       </div>
 
-      <button class="new-chat-btn" type="button" (click)="createChat()" [disabled]="creatingChat">
+      <button
+        class="new-chat-btn"
+        type="button"
+        title="New conversation"
+        (click)="createChat()"
+        [disabled]="creatingChat"
+      >
         +
       </button>
+
     </div>
+
+
+    <!-- Industry -->
 
     <div class="industry-selector">
-      <label for="industry"> Industry </label>
 
-      <select id="industry" [(ngModel)]="selectedIndustry" (change)="changeIndustry()">
-        <option value="healthcare">Healthcare</option>
+      <label for="industry">
+        Industry
+      </label>
 
-        <option value="finance">Finance</option>
+      <select
+        id="industry"
+        [(ngModel)]="selectedIndustry"
+        (change)="changeIndustry()"
+      >
+
+        <option value="healthcare">
+          Healthcare
+        </option>
+
+        <option value="finance">
+          Finance
+        </option>
+
       </select>
+
     </div>
 
+
+    <!-- Conversations -->
+
     @if (loadingChats) {
-      <div class="loading">Loading conversations...</div>
+
+      <div class="loading">
+        Loading conversations...
+      </div>
+
     } @else {
+
       <div class="conversation-list">
-        @for (chat of chats; track chat._id) {
-          <button
+
+        @for (
+          chat of chats;
+          track chat._id
+        ) {
+
+          <div
             class="conversation-item"
-            [class.active]="activeChat?._id === chat._id"
-            type="button"
+            [class.active]="
+              activeChat?._id === chat._id
+            "
             (click)="selectChat(chat)"
           >
-            <span class="conversation-title">
-              {{ chat.title }}
-            </span>
 
-            <span class="conversation-date">
-              {{ chat.updatedAt | date: 'short' }}
-            </span>
-          </button>
-        } @empty {
-          <div class="empty-conversations">
-            <p>No conversations yet.</p>
+            <div class="conversation-info">
 
-            <button type="button" (click)="createChat()">Start a conversation</button>
+              <span class="conversation-title">
+                {{ chat.title }}
+              </span>
+
+              <span class="conversation-date">
+                {{ chat.updatedAt | date: 'short' }}
+              </span>
+
+            </div>
+
+
+            <!-- Delete -->
+
+            <button
+              type="button"
+              class="delete-chat-btn"
+              title="Delete conversation"
+              [disabled]="
+                deletingChatId === chat._id
+              "
+              (click)="deleteChat(chat, $event)"
+            >
+
+              @if (
+                deletingChatId === chat._id
+              ) {
+
+                <span class="delete-spinner"></span>
+
+              } @else {
+
+                🗑
+
+              }
+
+            </button>
+
           </div>
+
+        } @empty {
+
+          <div class="empty-conversations">
+
+            <p>
+              No conversations yet.
+            </p>
+
+            <button
+              type="button"
+              (click)="createChat()"
+            >
+              Start a conversation
+            </button>
+
+          </div>
+
         }
+
       </div>
+
     }
+
   </aside>
 
-  <!-- Main Chat -->
+
+  <!-- =====================================================
+       MAIN CHAT
+  ====================================================== -->
+
   <main class="chat-panel">
+
+
     @if (!activeChat) {
+
+      <!-- Welcome -->
+
       <section class="welcome-screen">
-        <div class="welcome-icon">✦</div>
 
-        <h1>Nexora AI</h1>
+        <div class="welcome-icon">
+          ✦
+        </div>
 
-        <p>Ask questions about your organization's knowledge base.</p>
+        <h1>
+          Nexora AI
+        </h1>
 
-        <button type="button" (click)="createChat()" [disabled]="creatingChat">
+        <p>
+          Ask questions about your organization's
+          knowledge base.
+        </p>
+
+        <button
+          type="button"
+          (click)="createChat()"
+          [disabled]="creatingChat"
+        >
           Start New Conversation
         </button>
+
       </section>
+
+
     } @else {
-      <!-- Chat Header -->
+
+
+      <!-- =================================================
+           CHAT HEADER
+      ================================================== -->
+
       <header class="chat-header">
+
         <div>
+
           <h1>
             {{ activeChat.title }}
           </h1>
@@ -77,126 +200,377 @@
           <span>
             {{ activeChat.industry | titlecase }}
           </span>
+
         </div>
 
         <div class="status">
+
           <span class="status-dot"></span>
+
           AI Ready
+
         </div>
+
       </header>
 
-      <!-- Messages -->
+
+      <!-- =================================================
+           MESSAGES
+      ================================================== -->
+
       <section class="messages">
-        @for (message of activeChat.messages; track $index) {
+
+        @for (
+          message of activeChat.messages;
+          track $index
+        ) {
+
           <article
             class="message"
-            [class.user-message]="message.role === 'user'"
-            [class.ai-message]="message.role === 'assistant'"
+            [class.user-message]="
+              message.role === 'user'
+            "
+            [class.ai-message]="
+              message.role === 'assistant'
+            "
           >
+
             <div class="avatar">
-              @if (message.role === 'user') {
+
+              @if (
+                message.role === 'user'
+              ) {
+
                 You
+
               } @else {
+
                 AI
+
               }
+
             </div>
 
+
             <div class="message-body">
+
               <div class="message-role">
-                @if (message.role === 'user') {
+
+                @if (
+                  message.role === 'user'
+                ) {
+
                   You
+
                 } @else {
+
                   Nexora AI
+
                 }
+
               </div>
+
 
               <div class="message-content">
                 {{ message.content }}
               </div>
 
-              <!-- Sources -->
-              @if (message.role === 'assistant' && message.sources && message.sources.length > 0) {
-                <div class="sources">
-                  <div class="sources-title">Sources</div>
 
-                  @for (source of message.sources; track $index) {
+              <!-- Sources -->
+
+              @if (
+                message.role === 'assistant' &&
+                message.sources &&
+                message.sources.length > 0
+              ) {
+
+                <div class="sources">
+
+                  <div class="sources-title">
+                    Sources
+                  </div>
+
+
+                  @for (
+                    source of message.sources;
+                    track $index
+                  ) {
+
                     <div class="source">
+
                       <span class="source-number">
                         {{ $index + 1 }}
                       </span>
 
+
                       <div>
+
                         <strong>
                           {{ source.documentName }}
                         </strong>
 
                         <small>
-                          Chunk {{ source.chunkIndex ?? '-' }}
 
-                          @if (source.score) {
+                          Chunk
+                          {{ source.chunkIndex }}
+
+                          @if (
+                            source.score !== undefined
+                          ) {
+
                             ·
-                            {{ source.score * 100 | number: '1.0-1' }}% match
+
+                            {{
+                              source.score * 100
+                                | number: '1.0-1'
+                            }}%
+
+                            match
+
                           }
+
                         </small>
+
                       </div>
+
                     </div>
+
                   }
+
                 </div>
+
               }
+
             </div>
+
           </article>
+
         }
 
-        <!-- Loading -->
+
+        <!-- AI typing -->
+
         @if (sendingMessage) {
+
           <article class="message ai-message">
-            <div class="avatar">AI</div>
+
+            <div class="avatar">
+              AI
+            </div>
 
             <div class="message-body">
-              <div class="message-role">Nexora AI</div>
+
+              <div class="message-role">
+                Nexora AI
+              </div>
 
               <div class="typing">
+
                 <span></span>
                 <span></span>
                 <span></span>
+
               </div>
+
             </div>
+
           </article>
+
         }
+
       </section>
 
-      <!-- Composer -->
+
+      <!-- =================================================
+           COMPOSER
+      ================================================== -->
+
       <footer class="composer">
+
+
+        <!-- General error -->
+
         @if (errorMessage) {
+
           <div class="error">
             {{ errorMessage }}
           </div>
+
         }
 
+
+        <!-- Upload error -->
+
+        @if (uploadErrorMessage) {
+
+          <div class="attachment-error">
+            {{ uploadErrorMessage }}
+          </div>
+
+        }
+
+
+        <!-- Upload success -->
+
+        @if (uploadSuccessMessage) {
+
+          <div class="attachment-success">
+            ✓ {{ uploadSuccessMessage }}
+          </div>
+
+        }
+
+
+        <!-- Selected file -->
+
+        @if (selectedFile) {
+
+          <div class="attachment-preview">
+
+            <div class="attachment-icon">
+              PDF
+            </div>
+
+
+            <div class="attachment-info">
+
+              <strong>
+                {{ selectedFile.name }}
+              </strong>
+
+              <span>
+@if (uploadingFile) {
+
+  <span class="upload-status">
+    Uploading and processing...
+  </span>
+
+} @else if (uploadSuccessMessage) {
+
+  <span class="upload-status success">
+    ✓ Processed successfully
+  </span>
+
+} @else {
+
+  {{
+    selectedFile.size / 1024 / 1024
+      | number: '1.0-2'
+  }}
+  MB
+
+}
+
+              </span>
+
+            </div>
+
+
+            @if (uploadingFile) {
+
+              <span class="upload-spinner"></span>
+
+            } @else {
+
+              <button
+                type="button"
+                class="remove-attachment-btn"
+                title="Remove attachment"
+                (click)="clearAttachment(fileInput)"
+              >
+                ×
+              </button>
+
+            }
+
+          </div>
+
+        }
+
+
+        <!-- Input -->
+
         <div class="input-wrapper">
+
+
+          <!-- Hidden file input -->
+
+          <input
+            #fileInput
+            type="file"
+            accept=".pdf,application/pdf"
+            hidden
+            (change)="onFileSelected($event)"
+          />
+
+
+          <!-- Attachment -->
+
+          <button
+            type="button"
+            class="attach-btn"
+            title="Attach PDF"
+            [disabled]="
+              uploadingFile ||
+              sendingMessage
+            "
+            (click)="openFilePicker(fileInput)"
+          >
+            📎
+          </button>
+
+
+          <!-- Question -->
+
           <textarea
             [(ngModel)]="question"
             placeholder="Ask Nexora AI..."
             rows="1"
-            [disabled]="sendingMessage"
+            [disabled]="
+              sendingMessage ||
+              uploadingFile
+            "
             (keydown.enter)="handleEnter($event)"
           ></textarea>
+
+
+          <!-- Send -->
 
           <button
             type="button"
             class="send-btn"
             (click)="sendMessage()"
-            [disabled]="!question.trim() || sendingMessage"
+            [disabled]="
+              !question.trim() ||
+              sendingMessage ||
+              uploadingFile
+            "
           >
-            Send
+
+            @if (sendingMessage) {
+
+              <span class="send-spinner"></span>
+
+            } @else {
+
+              Send
+
+            }
+
           </button>
+
         </div>
 
+
         <p class="disclaimer">
-          AI-generated responses may contain mistakes. Verify important information with trusted
-          sources.
+          AI-generated responses may contain mistakes.
+          Verify important information with trusted sources.
         </p>
+
       </footer>
+
     }
+
   </main>
+
 </div>
