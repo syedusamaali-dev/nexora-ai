@@ -11,7 +11,8 @@ import { Observable } from 'rxjs';
 export class ApiService {
   private readonly http = inject(HttpClient);
 
-  private readonly baseUrl = 'http://localhost:5000/api';
+  // private readonly baseUrl = 'http://localhost:5000/api';
+  private readonly baseUrl = 'https://nexora-ai-production-9665.up.railway.app/api';
 
   get<T>(
     endpoint: string,
