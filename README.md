@@ -38,11 +38,16 @@ https://nexora-ai-production-9665.up.railway.app/api-docs
 
 ## 🎬 Demo
 
+https://github.com/syedusamaali-dev/nexora-ai/issues/1#issue-5203554343
 
 <!-- DEMO_GIF_START -->
 
 <p align="center">
-  <img src="./README-assests/NexoraRagApp.mp4" alt="Nexora AI Demo" width="900">
+  <video
+    src="https://github.com/user-attachments/assets/5499ca70-60c5-49a7-89cf-3727561e9dad"
+    controls
+    width="900">
+  </video>
 </p>
 
 <!-- DEMO_GIF_END -->
